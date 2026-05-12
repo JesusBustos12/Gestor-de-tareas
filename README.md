@@ -4,7 +4,6 @@
 **Dossier** es una plataforma de gestión de tareas de nivel empresarial diseñada con un enfoque en la seguridad, la robustez y una estética "vintage premium". Este proyecto ha sido sometido a una auditoría de preparación para producción para garantizar los más altos estándares de calidad.
 
 El proyecto cuenta con un sistema completo de autenticación de usuarios y una interfaz moderna y responsiva. Fue diseñado siguiendo un enfoque full-stack, integrando un frontend interactivo en React con un backend seguro en Node.js + Express, y persistencia en una base de datos relacional MySQL.
->>>>>>> edc2a84 (Actualizacion del README)
 
 Perfecto para demostrar habilidades full-stack reales en un portafolio profesional.
 
