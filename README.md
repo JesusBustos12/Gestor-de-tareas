@@ -1,7 +1,5 @@
 # Dossier — Enterprise Task Management System
 
-![Dossier Banner](https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6)
-
 Dossier es una plataforma de gestión de tareas de nivel empresarial diseñada con un enfoque en la seguridad, la robustez y una estética "vintage premium". Este proyecto ha sido sometido a una auditoría de preparación para producción para garantizar los más altos estándares de calidad.
 
 ## 🚀 Características Principales
