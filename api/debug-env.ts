@@ -1,6 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   const envCheck = {
     DB_HOST: process.env.DB_HOST ? '✅ Configurado' : '❌ NO encontrado',
     DB_PORT: process.env.DB_PORT || '❌ NO encontrado',
@@ -13,12 +11,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     NODE_ENV: process.env.NODE_ENV || 'no definido',
   };
 
-  // Probar si la app de Express se puede importar
   let expressStatus = '❌ Fallo';
   let expressError = '';
   try {
     const app = await import('../server/server');
-    expressStatus = app.default ? '✅ Importación exitosa' : '⚠️ Importado pero sin export default';
+    expressStatus = app.default ? '✅ Importación exitosa' : '⚠️ Sin export default';
   } catch (error: any) {
     expressError = error.message;
   }
