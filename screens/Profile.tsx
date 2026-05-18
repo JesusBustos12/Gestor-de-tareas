@@ -13,14 +13,16 @@ interface ProfileProps {
 const Profile: React.FC<ProfileProps> = ({ user, onBack }) => {
     const { theme } = useTheme();
     const { t, language } = useLanguage();
-    const { updateUser } = useAuth(); // Assuming useAuth is imported
+    const { updateUser, error: authError, clearError } = useAuth(); // Assuming useAuth is imported
 
     const [name, setName] = useState(user.name);
     const [email, setEmail] = useState(user.email);
     const [avatarUrl, setAvatarUrl] = useState(user.avatar || '');
     const [inputAvatarUrl, setInputAvatarUrl] = useState('');
+    const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -35,9 +37,27 @@ const Profile: React.FC<ProfileProps> = ({ user, onBack }) => {
         }
     };
 
-    const handleUpdate = () => {
-        updateUser({ name, avatar: avatarUrl });
-        setIsSuccessModalOpen(true);
+    const handleUpdate = async () => {
+        if (!name.trim()) {
+            setError(t('login.error.allFieldsRequired'));
+            return;
+        }
+        setError('');
+        clearError();
+        setIsLoading(true);
+
+        try {
+            const success = await updateUser({ name, avatar: avatarUrl });
+            if (success) {
+                setIsSuccessModalOpen(true);
+            } else {
+                setError(authError || 'No se pudo actualizar el perfil corporativo.');
+            }
+        } catch (err) {
+            setError('Error de conexión al servidor.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -124,6 +144,13 @@ const Profile: React.FC<ProfileProps> = ({ user, onBack }) => {
                                 </div>
                             </div>
 
+                            {error && (
+                                <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-800 text-sm">
+                                    <span className="material-icons text-red-500">error</span>
+                                    {error}
+                                </div>
+                            )}
+
                             {successMessage && (
                                 <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 text-green-800 text-sm">
                                     <span className="material-icons text-green-500">check_circle</span>
@@ -163,10 +190,27 @@ const Profile: React.FC<ProfileProps> = ({ user, onBack }) => {
                                 <button onClick={onBack} className={`px-6 py-2.5 rounded text-sm font-bold tracking-wide uppercase border shadow-sm transition-colors ${theme === 'dark' ? 'bg-stone-800 border-stone-600 text-stone-400 hover:bg-stone-700 hover:text-stone-200' : 'text-ink-light bg-[#F5F1E6] border-border-vintage hover:bg-[#E8E4D9] hover:text-ink'}`} type="button">
                                     {t('modal.cancel')}
                                 </button>
-                                <button onClick={handleUpdate} className="relative bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded shadow-sm hover:shadow-md transform active:translate-y-px transition-all group overflow-hidden" type="button">
+                                <button 
+                                    onClick={handleUpdate} 
+                                    disabled={isLoading}
+                                    className="relative bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded shadow-sm hover:shadow-md transform active:translate-y-px transition-all group overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none" 
+                                    type="button"
+                                >
                                     <span className="relative z-10 flex items-center gap-2 font-bold tracking-wide uppercase text-sm">
-                                        <span className="material-icons text-sm">save_as</span>
-                                        {t('profile.updateRecord')}
+                                        {isLoading ? (
+                                            <>
+                                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                </svg>
+                                                Guardando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="material-icons text-sm">save_as</span>
+                                                {t('profile.updateRecord')}
+                                            </>
+                                        )}
                                     </span>
                                 </button>
                             </div>

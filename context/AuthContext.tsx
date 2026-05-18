@@ -6,7 +6,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<boolean>;
     register: (name: string, email: string, password: string, avatar?: string) => Promise<boolean>;
-    updateUser: (user: Partial<User>) => void;
+    updateUser: (user: Partial<User>) => Promise<boolean>;
     logout: () => void;
     error: string | null;
     clearError: () => void;
@@ -83,8 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const updateUser = async (updatedUser: Partial<User>) => {
-        if (!user) return;
+    const updateUser = async (updatedUser: Partial<User>): Promise<boolean> => {
+        if (!user) return false;
         
         try {
             const token = localStorage.getItem('jwt');
@@ -102,15 +102,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setUser(newUserData);
                 localStorage.setItem('currentUser', JSON.stringify(newUserData));
                 setError(null);
+                return true;
             } else if (res.status === 401) {
                 logout();
+                return false;
             } else {
                 const data = await res.json();
                 setError(data.message || 'Error actualizando perfil');
+                return false;
             }
         } catch (error) {
             console.error('Update user error:', error);
             setError('Error de conexión con el servidor');
+            return false;
         }
     };
 

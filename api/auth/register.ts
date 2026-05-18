@@ -52,13 +52,8 @@ export default async function handler(req: any, res: any) {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Determinar avatar: solo URLs cortas (no data:base64 que exceden VARCHAR(255))
-        // Si el avatar es una URL http/https válida y cabe en VARCHAR(255), se guarda
-        // Si es base64 (subida de archivo) o vacío, se genera uno con ui-avatars.com
-        let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=128`;
-        if (avatar && avatar.startsWith('http') && avatar.length <= 255) {
-            avatarUrl = avatar;
-        }
+        // Determinar avatar: ahora que la columna es LONGTEXT, se puede guardar tanto URL como base64
+        let avatarUrl = avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=128`;
 
         const [result] = await pool.query(
             'INSERT INTO users (name, email, password, avatar) VALUES (?, ?, ?, ?)',
