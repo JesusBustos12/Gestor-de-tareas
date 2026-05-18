@@ -162,7 +162,7 @@ export const translations: Translations = {
     // Login - Success modal
     'login.success.title': { es: '¡Registro Exitoso!', en: 'Registration Successful!' },
     'login.success.message': { es: 'Tu cuenta ha sido creada correctamente.', en: 'Your account has been created successfully.' },
-    'login.success.button': { es: 'Ir al Dashboard', en: 'Go to Dashboard' },
+    'login.success.button': { es: 'Ir a Iniciar Sesión', en: 'Go to Login' },
 
     // Profile - Success modal
     'profile.success.button': { es: 'Entendido', en: 'Got it' }

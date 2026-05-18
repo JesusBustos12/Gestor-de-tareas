@@ -40,7 +40,7 @@ export default async function handler(req: any, res: any) {
             });
         }
 
-        const { name, email, password } = parsed.data;
+        const { name, email, password, avatar } = parsed.data;
 
         // Verificar si el usuario ya existe
         const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]) as any[];
@@ -52,11 +52,17 @@ export default async function handler(req: any, res: any) {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // INSERT sin avatar (igual que el backend original)
-        // El avatar se asigna por defecto en la BD: 'https://ui-avatars.com/api/?name=User'
+        // Determinar avatar: solo URLs cortas (no data:base64 que exceden VARCHAR(255))
+        // Si el avatar es una URL http/https válida y cabe en VARCHAR(255), se guarda
+        // Si es base64 (subida de archivo) o vacío, se genera uno con ui-avatars.com
+        let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=128`;
+        if (avatar && avatar.startsWith('http') && avatar.length <= 255) {
+            avatarUrl = avatar;
+        }
+
         const [result] = await pool.query(
-            'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-            [name, email, hashedPassword]
+            'INSERT INTO users (name, email, password, avatar) VALUES (?, ?, ?, ?)',
+            [name, email, hashedPassword, avatarUrl]
         ) as any[];
 
         if (!process.env.JWT_SECRET) {
@@ -72,7 +78,7 @@ export default async function handler(req: any, res: any) {
         return res.status(201).json({
             message: 'Usuario registrado exitosamente',
             token,
-            user: { id: result.insertId, name, email }
+            user: { id: result.insertId, name, email, avatar: avatarUrl }
         });
     } catch (error: any) {
         console.error('Register error:', error.message);

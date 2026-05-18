@@ -69,9 +69,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const data = await res.json();
             
             if (res.ok) {
-                localStorage.setItem('jwt', data.token);
-                localStorage.setItem('currentUser', JSON.stringify(data.user));
-                setUser(data.user);
+                // NO auto-login aquí. El componente Login mostrará
+                // el popup de éxito y luego redirigirá al inicio de sesión.
                 setError(null);
                 return true;
             }

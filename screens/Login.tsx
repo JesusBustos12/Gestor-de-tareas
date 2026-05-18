@@ -11,12 +11,13 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const { language, setLanguage, t } = useLanguage();
     const { theme, toggleTheme } = useTheme();
-    const { login, register } = useAuth();
+    const { login, register, error: authError, clearError } = useAuth();
 
     const [isRegistering, setIsRegistering] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Form states
     const [email, setEmail] = useState('');
@@ -42,29 +43,36 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
+        clearError();
+        setIsLoading(true);
 
-        if (isRegistering) {
-            if (!name || !email || !password) {
-                setError(t('login.error.allFieldsRequired'));
-                return;
-            }
-            const success = await register(name, email, password, avatarUrl);
-            if (success) {
-                setIsSuccessModalOpen(true);
+        try {
+            if (isRegistering) {
+                if (!name || !email || !password) {
+                    setError(t('login.error.allFieldsRequired'));
+                    return;
+                }
+                const success = await register(name, email, password, avatarUrl);
+                if (success) {
+                    setIsSuccessModalOpen(true);
+                } else {
+                    // Usar el error específico del API (authError) si existe
+                    setError(authError || t('login.error.emailRegistered'));
+                }
             } else {
-                setError(t('login.error.emailRegistered'));
+                if (!email || !password) {
+                    setError(t('login.error.enterCredentials'));
+                    return;
+                }
+                const success = await login(email, password);
+                if (success) {
+                    if(onLogin) onLogin();
+                } else {
+                    setError(authError || t('login.error.invalidCredentials'));
+                }
             }
-        } else {
-            if (!email || !password) {
-                setError(t('login.error.enterCredentials'));
-                return;
-            }
-            const success = await login(email, password);
-            if (success) {
-                if(onLogin) onLogin();
-            } else {
-                setError(t('login.error.invalidCredentials'));
-            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -245,11 +253,24 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                             <div className="pt-2">
                                 <button
-                                    className="w-full bg-primary hover:bg-primary-hover text-white font-bold px-4 py-3 rounded-md shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm"
+                                    className="w-full bg-primary hover:bg-primary-hover text-white font-bold px-4 py-3 rounded-md shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
                                     type="submit"
+                                    disabled={isLoading}
                                 >
-                                    <span className="material-icons text-sm">{isRegistering ? 'person_add' : 'login'}</span>
-                                    {isRegistering ? t('login.register') : t('login.authenticate')}
+                                    {isLoading ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            {isRegistering ? 'Registrando...' : 'Autenticando...'}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="material-icons text-sm">{isRegistering ? 'person_add' : 'login'}</span>
+                                            {isRegistering ? t('login.register') : t('login.authenticate')}
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </form>
@@ -283,9 +304,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 isOpen={isSuccessModalOpen}
                 onClose={() => {
                     setIsSuccessModalOpen(false);
-                    if (email && password) {
-                        login(email, password);
-                    }
+                    // Redirigir al inicio de sesión (no al dashboard)
+                    setIsRegistering(false);
+                    setName('');
+                    setAvatarUrl('');
+                    setInputAvatarUrl('');
+                    setPassword('');
+                    // Mantener el email para que el usuario lo tenga listo
                 }}
                 title={t('login.success.title')}
                 message={t('login.success.message')}
