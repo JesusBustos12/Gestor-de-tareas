@@ -69,7 +69,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     };
 
     return (
-        <div className={`min-h-screen flex items-center justify-center p-4 relative overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-background-dark' : 'bg-stone-100'}`}>
+        <div className={`min-h-screen flex items-center justify-center p-4 relative overflow-y-auto transition-colors duration-500 ${theme === 'dark' ? 'bg-background-dark' : 'bg-stone-100'}`}>
             <div className={`fixed inset-0 ${theme === 'dark' ? 'opacity-[0.03]' : 'opacity-40'} bg-paper-texture pointer-events-none z-0 mix-blend-multiply`}></div>
 
             {/* Context Controls (Language & Theme) */}

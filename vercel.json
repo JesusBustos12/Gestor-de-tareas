@@ -1,8 +1,6 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/debug-env", "destination": "/api/debug-env.ts" },
-    { "source": "/api/(.*)", "destination": "/api/index.ts" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
