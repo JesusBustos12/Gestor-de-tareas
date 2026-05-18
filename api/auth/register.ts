@@ -7,7 +7,7 @@ const registerSchema = z.object({
     name: z.string().min(2).max(100),
     email: z.string().email().max(255),
     password: z.string().min(8).max(128),
-    avatar: z.string().url().optional().or(z.literal('')),
+    avatar: z.string().optional().or(z.literal('')),
 });
 
 function getPool() {
@@ -40,7 +40,7 @@ export default async function handler(req: any, res: any) {
             });
         }
 
-        const { name, email, password, avatar } = parsed.data;
+        const { name, email, password } = parsed.data;
 
         // Verificar si el usuario ya existe
         const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]) as any[];
@@ -52,11 +52,11 @@ export default async function handler(req: any, res: any) {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const avatarUrl = avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
-
+        // INSERT sin avatar (igual que el backend original)
+        // El avatar se asigna por defecto en la BD: 'https://ui-avatars.com/api/?name=User'
         const [result] = await pool.query(
-            'INSERT INTO users (name, email, password, avatar) VALUES (?, ?, ?, ?)',
-            [name, email, hashedPassword, avatarUrl]
+            'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+            [name, email, hashedPassword]
         ) as any[];
 
         if (!process.env.JWT_SECRET) {
@@ -72,7 +72,7 @@ export default async function handler(req: any, res: any) {
         return res.status(201).json({
             message: 'Usuario registrado exitosamente',
             token,
-            user: { id: result.insertId, name, email, avatar: avatarUrl }
+            user: { id: result.insertId, name, email }
         });
     } catch (error: any) {
         console.error('Register error:', error.message);
