@@ -7,11 +7,15 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 export function useTasks() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const { logout } = useAuth();
+    const { logout, user, isAuthenticated } = useAuth();
 
     useEffect(() => {
-        fetchTasks();
-    }, []);
+        if (isAuthenticated && user) {
+            fetchTasks();
+        } else {
+            setTasks([]);
+        }
+    }, [isAuthenticated, user]);
 
     const fetchTasks = async () => {
         const token = localStorage.getItem('jwt');
