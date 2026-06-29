@@ -1,5 +1,4 @@
-import cookiePkg from 'cookie';
-const serialize = cookiePkg.serialize;
+import { serialize } from 'cookie';
 
 export default async function handler(req: any, res: any) {
     const allowedOrigin = process.env.FRONTEND_URL || 'https://gestor-de-tareas-henna.vercel.app';

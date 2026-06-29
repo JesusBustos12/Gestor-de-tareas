@@ -7,8 +7,7 @@ const loginSchema = z.object({
     email: z.string().email(),
     password: z.string().min(1),
 });
-import cookiePkg from 'cookie';
-const serialize = cookiePkg.serialize;
+import { serialize } from 'cookie';
 
 function getPool() {
     return mysql.createPool({

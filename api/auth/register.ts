@@ -9,8 +9,7 @@ const registerSchema = z.object({
     password: z.string().min(8).max(128),
     avatar: z.string().optional().or(z.literal('')),
 });
-import cookiePkg from 'cookie';
-const serialize = cookiePkg.serialize;
+import { serialize } from 'cookie';
 
 function getPool() {
     return mysql.createPool({
