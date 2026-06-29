@@ -77,8 +77,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const data = await res.json();
             
             if (res.ok) {
-                // Backend now sets cookie on register, so we can auto-login
-                setUser(data.user);
+                // Return true to trigger the success modal in Login.tsx
+                // The user will then manually log in, which sets the user state.
                 setError(null);
                 return true;
             }

@@ -44,7 +44,7 @@ router.post('/register', authLimiter, validate(registerSchema), async (req: Requ
             { expiresIn: '24h' }
         );
 
-        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 24 * 60 * 60 * 1000 });
+        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
         res.status(201).json({ 
             message: 'Usuario registrado exitosamente',
             user: { id: result.insertId, name, email, theme: 'light', language: 'es' }
@@ -84,7 +84,7 @@ router.post('/login', authLimiter, validate(loginSchema), async (req: Request, r
             { expiresIn: '24h' }
         );
 
-        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 24 * 60 * 60 * 1000 });
+        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
         res.json({
             message: 'Autenticación exitosa',
             user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar, theme: user.theme || 'light', language: user.language || 'es' }
