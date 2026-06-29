@@ -126,11 +126,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const logout = async () => {
         try {
-            await fetch(`${API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
-        } catch (e) {
-            console.error(e);
+            await fetch(`${API_URL}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (error) {
+            console.error('Logout error:', error);
         }
         setUser(null);
+        setError(null);
     };
 
     return (
