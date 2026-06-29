@@ -1,4 +1,5 @@
-import { parse } from 'cookie';
+import cookiePkg from 'cookie';
+const parse = cookiePkg.parse;
 import jwt from 'jsonwebtoken';
 
 export function verifyVercelToken(req: any, res: any): any | null {

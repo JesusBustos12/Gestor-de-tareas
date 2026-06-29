@@ -23,7 +23,7 @@ function getPool() {
         connectionLimit: 5,
     });
 }
-import { verifyVercelToken } from '../utils/auth';
+import { verifyVercelToken } from '../utils/auth.js';
 
 
 export default async function handler(req: any, res: any) {

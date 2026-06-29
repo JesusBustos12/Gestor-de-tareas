@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise';
-import { verifyVercelToken } from '../utils/auth';
+import { verifyVercelToken } from '../utils/auth.js';
 
 function getPool() {
     return mysql.createPool({
