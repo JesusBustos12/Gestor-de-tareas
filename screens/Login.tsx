@@ -125,7 +125,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                     <div className="p-8 md:p-10 relative">
                         {/* Header */}
-                        <div className="text-center mb-8">
+                        <div className="flex flex-col items-center text-center mb-8">
+                            <img src="/lista-de-tareas.png" alt="Logo Dossier" className="w-16 h-16 object-contain mb-4" />
                             <h1 className={`text-2xl font-bold tracking-tight uppercase font-sans mb-1 transition-colors ${theme === 'dark' ? 'text-stone-200' : 'text-ink'}`}>
                                 {isRegistering ? t('login.createAccount') : t('login.title')}
                             </h1>
