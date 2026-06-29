@@ -23,8 +23,10 @@ export default async function handler(req: any, res: any) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
 
-    const decoded = verifyVercelToken(req, res);
-    if (!decoded) return; // verifyVercelToken already sends the 401 response
+    const decoded = verifyVercelToken(req, res, true);
+    if (!decoded) {
+        return res.status(200).json({ user: null });
+    }
 
     const pool = getPool();
     try {

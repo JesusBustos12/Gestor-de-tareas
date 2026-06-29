@@ -127,14 +127,27 @@ router.put('/profile', verifyToken, validate(profileUpdateSchema), async (req: R
     }
 });
 
-// Obtener sesión actual
-router.get('/me', verifyToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+// Obtener sesión actual (comprobación silenciosa)
+router.get('/me', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userId = (req as AuthRequest).user.id;
-        const [users] = await pool.query<RowDataPacket[]>('SELECT id, name, email, avatar, theme, language FROM users WHERE id = ?', [userId]);
+        const token = req.cookies?.token;
+        if (!token || !process.env.JWT_SECRET) {
+            res.status(200).json({ user: null });
+            return;
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET) as { id: number; email: string };
+        } catch {
+            res.status(200).json({ user: null });
+            return;
+        }
+
+        const [users] = await pool.query<RowDataPacket[]>('SELECT id, name, email, avatar, theme, language FROM users WHERE id = ?', [decoded.id]);
         
         if (users.length === 0) {
-            res.status(404).json({ message: 'Usuario no encontrado' });
+            res.status(200).json({ user: null });
             return;
         }
         
