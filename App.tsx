@@ -21,19 +21,37 @@ const AppContent: React.FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const { tasks, addTask, updateTask, deleteTask, toggleTaskComplete } = useTasks();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const { theme } = useTheme();
     const { language } = useLanguage();
 
+    const [showSplash, setShowSplash] = useState(false);
+    const [hasCheckedSplash, setHasCheckedSplash] = useState(false);
+
     useEffect(() => {
-        if (isAuthenticated) {
-            if (currentScreen === 'login') {
-                setCurrentScreen('dashboard');
+        if (!isLoading && !hasCheckedSplash) {
+            if (isAuthenticated) {
+                setShowSplash(true);
+                const timer = setTimeout(() => {
+                    setShowSplash(false);
+                    setHasCheckedSplash(true);
+                    setCurrentScreen('dashboard');
+                }, 5000);
+                return () => clearTimeout(timer);
+            } else {
+                setHasCheckedSplash(true);
+                setCurrentScreen('login');
             }
-        } else {
-            setCurrentScreen('login');
+        } else if (hasCheckedSplash) {
+            if (isAuthenticated) {
+                if (currentScreen === 'login') {
+                    setCurrentScreen('dashboard');
+                }
+            } else {
+                setCurrentScreen('login');
+            }
         }
-    }, [isAuthenticated]);
+    }, [isLoading, isAuthenticated, hasCheckedSplash, currentScreen]);
 
     const handleNavigate = (screen: Screen) => {
         setCurrentScreen(screen);
@@ -76,6 +94,29 @@ const AppContent: React.FC = () => {
         setIsModalOpen(false);
         setEditingTask(null);
     };
+
+    if (isLoading) {
+        return (
+            <div className={`flex items-center justify-center h-screen w-screen relative ${theme === 'dark' ? 'bg-background-dark text-stone-200' : 'bg-background-light text-stone-900'}`}>
+                <div className={`paper-texture ${theme === 'dark' ? 'opacity-5' : 'opacity-100'}`}></div>
+                <div className={`aged-overlay ${theme === 'dark' ? 'opacity-5' : 'opacity-100'}`}></div>
+            </div>
+        );
+    }
+
+    if (showSplash) {
+        return (
+            <div className={`flex flex-col items-center justify-center h-screen w-screen relative overflow-hidden transition-colors duration-500 ${theme === 'dark' ? 'bg-background-dark text-stone-200' : 'bg-background-light text-stone-900'}`}>
+                <div className={`paper-texture ${theme === 'dark' ? 'opacity-5' : 'opacity-100'}`}></div>
+                <div className={`aged-overlay ${theme === 'dark' ? 'opacity-5' : 'opacity-100'}`}></div>
+                
+                <div className="flex flex-col items-center gap-6 z-10 animate-pulse">
+                    <img src="/lista-de-tareas.png" alt="Logo Dossier" className="w-32 h-32 object-contain filter drop-shadow-md" />
+                    <h1 className="font-bold text-5xl tracking-widest font-serif">Dossier</h1>
+                </div>
+            </div>
+        );
+    }
 
     if (!isAuthenticated) {
         return <Login />;

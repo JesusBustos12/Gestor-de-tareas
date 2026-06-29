@@ -4,6 +4,7 @@ import { User } from '../types';
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
+    isLoading: boolean;
     login: (email: string, password: string) => Promise<boolean>;
     register: (name: string, email: string, password: string, avatar?: string) => Promise<boolean>;
     updateUser: (user: Partial<User>) => Promise<boolean>;
@@ -138,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, register, logout, updateUser, error, clearError }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, updateUser, error, clearError }}>
             {children}
         </AuthContext.Provider>
     );
