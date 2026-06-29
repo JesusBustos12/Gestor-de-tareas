@@ -9,6 +9,7 @@ const registerSchema = z.object({
     password: z.string().min(8).max(128),
     avatar: z.string().optional().or(z.literal('')),
 });
+import { serialize } from 'cookie';
 
 function getPool() {
     return mysql.createPool({
@@ -27,6 +28,7 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
@@ -71,10 +73,18 @@ export default async function handler(req: any, res: any) {
             { expiresIn: '24h' }
         );
 
+        const cookieStr = serialize('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production' || process.env.VERCEL === '1',
+            sameSite: (process.env.NODE_ENV === 'production' || process.env.VERCEL === '1') ? 'none' : 'lax',
+            maxAge: 24 * 60 * 60,
+            path: '/'
+        });
+        res.setHeader('Set-Cookie', cookieStr);
+
         return res.status(201).json({
             message: 'Usuario registrado exitosamente',
-            token,
-            user: { id: result.insertId, name, email, avatar: avatarUrl }
+            user: { id: result.insertId, name, email, avatar: avatarUrl, theme: 'light', language: 'es' }
         });
     } catch (error: any) {
         console.error('Register error:', error.message);

@@ -18,28 +18,20 @@ function getPool() {
         connectionLimit: 5,
     });
 }
+import { verifyVercelToken } from '../utils/auth';
 
-function verifyToken(req: any): { id: number; email: string } | null {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token || !process.env.JWT_SECRET) return null;
-    try {
-        return jwt.verify(token, process.env.JWT_SECRET) as { id: number; email: string };
-    } catch {
-        return null;
-    }
-}
 
 export default async function handler(req: any, res: any) {
     const allowedOrigin = process.env.FRONTEND_URL || 'https://gestor-de-tareas-henna.vercel.app';
     res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
     res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'PUT') return res.status(405).json({ message: 'Method not allowed' });
 
-    const user = verifyToken(req);
-    if (!user) return res.status(401).json({ message: 'Sesión inválida o expirada' });
+    const user = verifyVercelToken(req, res);
+    if (!user) return; // verifyVercelToken handles the 401 response
 
     const pool = getPool();
     try {
