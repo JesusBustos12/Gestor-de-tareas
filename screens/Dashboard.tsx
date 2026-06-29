@@ -268,7 +268,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                     <button
                         onClick={onOpenNewTask}
-                        className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg shadow-sm hover:shadow transition-all group border border-red-900/20"
+                        className="flex items-center justify-center sm:w-[150px] gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg shadow-sm hover:shadow transition-all group border border-red-900/20"
                     >
                         <span className="material-icons text-[20px] group-hover:rotate-90 transition-transform">add</span>
                         <span className="text-sm font-semibold hidden sm:inline">{t('header.newTask')}</span>
