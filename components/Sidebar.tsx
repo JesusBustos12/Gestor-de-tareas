@@ -50,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             <aside className={`fixed md:relative inset-y-0 left-0 w-64 flex-shrink-0 border-r flex flex-col z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 h-full ${isOpen ? 'translate-x-0' : '-translate-x-full'} ${theme === 'dark' ? 'bg-sidebar-dark border-stone-700' : 'bg-sidebar-light border-stone-300/60'}`}>
                 <div className={`h-16 flex items-center px-6 border-b ${theme === 'dark' ? 'border-stone-700' : 'border-stone-300/60'}`}>
-                    <div className="flex items-center gap-2" onClick={() => onNavigate('dashboard')} role="button" aria-label="Go to Dashboard">
+                    <div className="flex items-center gap-2 !cursor-default" onClick={() => onNavigate('dashboard')} role="button" aria-label="Go to Dashboard">
                         <img src="/lista-de-tareas.png" alt="Logo Dossier" className="w-8 h-8 object-contain" />
                         <span className={`font-bold text-lg tracking-tight font-serif ${theme === 'dark' ? 'text-stone-200' : 'text-stone-900'}`}>Dossier</span>
                     </div>
