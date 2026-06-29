@@ -18,12 +18,9 @@ export function useTasks() {
     }, [isAuthenticated, user]);
 
     const fetchTasks = async () => {
-        const token = localStorage.getItem('jwt');
-        if (!token) return;
-
         try {
             const res = await fetch(`${API_URL}/tasks`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
             if (res.ok) {
                 const data = await res.json();
@@ -42,17 +39,14 @@ export function useTasks() {
     };
 
     const addTask = async (task: Omit<Task, 'id' | 'createdAt'>) => {
-        const token = localStorage.getItem('jwt');
-        if (!token) return;
-
         try {
             const res = await fetch(`${API_URL}/tasks`, {
                 method: 'POST',
                 headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(task)
+                body: JSON.stringify(task),
+                credentials: 'include'
             });
             if (res.ok) {
                 await fetchTasks(); // Refresh to get the properly formatted task from backend
@@ -63,9 +57,6 @@ export function useTasks() {
     };
 
     const updateTask = async (id: string, updates: Partial<Task>) => {
-        const token = localStorage.getItem('jwt');
-        if (!token) return;
-
         // Optimistic UI Update
         setTasks(prev => prev.map(task =>
             task.id === id ? { ...task, ...updates } : task
@@ -75,10 +66,10 @@ export function useTasks() {
             await fetch(`${API_URL}/tasks/${id}`, {
                 method: 'PUT',
                 headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(updates)
+                body: JSON.stringify(updates),
+                credentials: 'include'
             });
         } catch (error) {
             console.error('Error updating task:', error);
@@ -87,16 +78,13 @@ export function useTasks() {
     };
 
     const deleteTask = async (id: string) => {
-        const token = localStorage.getItem('jwt');
-        if (!token) return;
-
         // Optimistic UI Update
         setTasks(prev => prev.filter(task => task.id !== id));
 
         try {
             await fetch(`${API_URL}/tasks/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
         } catch (error) {
             console.error('Error deleting task:', error);

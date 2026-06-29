@@ -3,6 +3,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { authLimiter } from './middleware/rateLimit';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
@@ -30,6 +31,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -46,10 +48,21 @@ app.use(errorHandler);
 const initDB = async () => {
     try {
         const pool = (await import('./db')).default;
-        await pool.query('ALTER TABLE users MODIFY COLUMN avatar LONGTEXT;');
-        console.log('✅ Base de datos verificada: Columna avatar optimizada para imágenes.');
+        
+        try {
+            await pool.query('ALTER TABLE users MODIFY COLUMN avatar LONGTEXT;');
+            console.log('✅ Base de datos verificada: Columna avatar optimizada para imágenes.');
+        } catch (e) {}
+
+        try {
+            await pool.query("ALTER TABLE users ADD COLUMN theme VARCHAR(20) DEFAULT 'light';");
+            await pool.query("ALTER TABLE users ADD COLUMN language VARCHAR(20) DEFAULT 'es';");
+            console.log('✅ Base de datos verificada: Columnas theme y language añadidas a users.');
+        } catch (e) {
+            // Ignorar el error si las columnas ya existen
+        }
     } catch (error) {
-        console.warn('⚠️ Nota: No se pudo auto-optimizar la columna avatar. Asegúrese de que sea LONGTEXT manualmente.');
+        console.error('⚠️ Error general inicializando la base de datos:', error);
     }
 };
 

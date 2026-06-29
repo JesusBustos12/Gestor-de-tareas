@@ -18,20 +18,28 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const clearError = () => setError(null);
 
-    // Initial load: check if token exists
+    // Initial load: fetch session from backend cookie
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
-        const storedUser = localStorage.getItem('currentUser');
-        if (token && storedUser) {
+        const checkSession = async () => {
             try {
-                setUser(JSON.parse(storedUser));
+                const res = await fetch(`${API_URL}/auth/me`, {
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setUser(data.user);
+                }
             } catch (e) {
-                console.error('Error parsing stored user');
+                console.error('Error checking session', e);
+            } finally {
+                setIsLoading(false);
             }
-        }
+        };
+        checkSession();
     }, []);
 
     const login = async (email: string, password: string): Promise<boolean> => {
@@ -39,13 +47,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const res = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password }),
+                credentials: 'include'
             });
             const data = await res.json();
             
             if (res.ok) {
-                localStorage.setItem('jwt', data.token);
-                localStorage.setItem('currentUser', JSON.stringify(data.user));
                 setUser(data.user);
                 setError(null);
                 return true;
@@ -64,13 +71,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const res = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, avatar })
+                body: JSON.stringify({ name, email, password, avatar }),
+                credentials: 'include'
             });
             const data = await res.json();
             
             if (res.ok) {
-                // NO auto-login aquí. El componente Login mostrará
-                // el popup de éxito y luego redirigirá al inicio de sesión.
+                // Backend now sets cookie on register, so we can auto-login
+                setUser(data.user);
                 setError(null);
                 return true;
             }
@@ -87,20 +95,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!user) return false;
         
         try {
-            const token = localStorage.getItem('jwt');
             const res = await fetch(`${API_URL}/auth/profile`, {
                 method: 'PUT',
                 headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(updatedUser)
+                body: JSON.stringify(updatedUser),
+                credentials: 'include'
             });
 
             if (res.ok) {
                 const newUserData = { ...user, ...updatedUser } as User;
                 setUser(newUserData);
-                localStorage.setItem('currentUser', JSON.stringify(newUserData));
                 setError(null);
                 return true;
             } else if (res.status === 401) {
@@ -118,10 +124,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await fetch(`${API_URL}/auth/logout`, { method: 'POST', credentials: 'include' });
+        } catch (e) {
+            console.error(e);
+        }
         setUser(null);
-        localStorage.removeItem('jwt');
-        localStorage.removeItem('currentUser');
     };
 
     return (

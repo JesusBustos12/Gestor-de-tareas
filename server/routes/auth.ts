@@ -44,10 +44,10 @@ router.post('/register', authLimiter, validate(registerSchema), async (req: Requ
             { expiresIn: '24h' }
         );
 
+        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 24 * 60 * 60 * 1000 });
         res.status(201).json({ 
             message: 'Usuario registrado exitosamente',
-            token,
-            user: { id: result.insertId, name, email }
+            user: { id: result.insertId, name, email, theme: 'light', language: 'es' }
         });
     } catch (error) {
         next(error);
@@ -84,10 +84,10 @@ router.post('/login', authLimiter, validate(loginSchema), async (req: Request, r
             { expiresIn: '24h' }
         );
 
+        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 24 * 60 * 60 * 1000 });
         res.json({
             message: 'Autenticación exitosa',
-            token,
-            user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar }
+            user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar, theme: user.theme || 'light', language: user.language || 'es' }
         });
 
     } catch (error) {
@@ -122,6 +122,61 @@ router.put('/profile', verifyToken, validate(profileUpdateSchema), async (req: R
         await pool.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
 
         res.json({ message: 'Perfil actualizado exitosamente' });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Obtener sesión actual
+router.get('/me', verifyToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const userId = (req as AuthRequest).user.id;
+        const [users] = await pool.query<RowDataPacket[]>('SELECT id, name, email, avatar, theme, language FROM users WHERE id = ?', [userId]);
+        
+        if (users.length === 0) {
+            res.status(404).json({ message: 'Usuario no encontrado' });
+            return;
+        }
+        
+        const user = users[0];
+        res.json({
+            user: { id: user.id, name: user.name, email: user.email, avatar: user.avatar, theme: user.theme || 'light', language: user.language || 'es' }
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Cerrar sesión
+router.post('/logout', (req: Request, res: Response) => {
+    res.clearCookie('token');
+    res.json({ message: 'Sesión cerrada exitosamente' });
+});
+
+// Actualizar preferencias (tema e idioma)
+router.put('/preferences', verifyToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const userId = (req as AuthRequest).user.id;
+        const { theme, language } = req.body;
+        
+        const fields: string[] = [];
+        const values: any[] = [];
+        
+        if (theme) {
+            fields.push('theme = ?');
+            values.push(theme);
+        }
+        if (language) {
+            fields.push('language = ?');
+            values.push(language);
+        }
+        
+        if (fields.length > 0) {
+            values.push(userId);
+            await pool.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+        }
+        
+        res.json({ message: 'Preferencias actualizadas' });
     } catch (error) {
         next(error);
     }

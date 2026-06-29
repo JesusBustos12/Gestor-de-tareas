@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useAuth } from './AuthContext';
 
 type Theme = 'light' | 'dark';
 
@@ -9,9 +9,17 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light');
+    const { user } = useAuth();
+    const [theme, setTheme] = useState<Theme>('light');
+
+    useEffect(() => {
+        if (user && user.theme) {
+            setTheme(user.theme as Theme);
+        }
+    }, [user]);
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -22,8 +30,21 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     }, [theme]);
 
-    const toggleTheme = () => {
-        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    const toggleTheme = async () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        if (user) {
+            try {
+                await fetch(`${API_URL}/auth/preferences`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ theme: newTheme }),
+                    credentials: 'include'
+                });
+            } catch(e) {
+                console.error('Failed to update theme in cloud', e);
+            }
+        }
     };
 
     return (

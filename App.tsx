@@ -142,13 +142,13 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
     return (
-        <LanguageProvider>
-            <AuthProvider>
+        <AuthProvider>
+            <LanguageProvider>
                 <ThemeProvider>
                     <AppContent />
                 </ThemeProvider>
-            </AuthProvider>
-        </LanguageProvider>
+            </LanguageProvider>
+        </AuthProvider>
     );
 };
 
