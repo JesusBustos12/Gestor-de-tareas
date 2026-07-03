@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:full": "concurrently \"npm run dev\" \"npm run dev --prefix server\"",
+    "dev:full": "concurrently \"pnpm run dev\" \"pnpm run dev --prefix server\"",
     "build": "vite build",
     "preview": "vite preview"
   },
