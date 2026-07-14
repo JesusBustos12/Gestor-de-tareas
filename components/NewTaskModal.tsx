@@ -106,14 +106,14 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({ isOpen, onClose, onSave, ta
 
             <main 
                 ref={modalRef}
-                className={`relative z-10 w-full max-w-4xl shadow-2xl rounded-xl overflow-hidden border transform transition-all scale-100 opacity-100 ${theme === 'dark' ? 'bg-background-dark border-stone-700' : 'bg-[#fdf8ec] border-[#e3dac6]'}`}
+                className={`relative z-10 w-full max-w-4xl flex flex-col max-h-[95vh] md:max-h-[90vh] shadow-2xl rounded-xl overflow-hidden border transform transition-all scale-100 opacity-100 ${theme === 'dark' ? 'bg-background-dark border-stone-700' : 'bg-[#fdf8ec] border-[#e3dac6]'}`}
             >
                 {/* Top red bar */}
-                <div className="h-2 bg-[#d93025] w-full"></div>
+                <div className="shrink-0 h-2 bg-[#d93025] w-full"></div>
 
-                <div className="flex flex-col md:flex-row h-full">
+                <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
                     {/* Sidebar of the modal */}
-                    <aside className={`w-full md:w-64 border-r p-6 flex flex-col justify-between ${theme === 'dark' ? 'bg-card-dark border-stone-700' : 'bg-[#f7f0e1] border-[#e3dac6]'}`}>
+                    <aside className={`shrink-0 w-full md:w-64 border-r p-4 md:p-6 flex flex-col justify-between ${theme === 'dark' ? 'bg-card-dark border-stone-700' : 'bg-[#f7f0e1] border-[#e3dac6]'}`}>
                         <div>
                             <div className="flex items-center gap-2 mb-8 text-[#d93025] font-bold tracking-wider uppercase text-sm">
                                 <span className="material-icons text-lg">folder_open</span>
@@ -155,7 +155,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({ isOpen, onClose, onSave, ta
                     </aside>
 
                     {/* Form Section */}
-                    <section className={`flex-1 p-6 md:p-10 relative max-h-[80vh] overflow-y-auto ${theme === 'dark' ? 'bg-background-dark' : 'bg-[#fdf8ec]'}`}>
+                    <section className={`flex-1 p-4 md:p-10 relative overflow-y-auto ${theme === 'dark' ? 'bg-background-dark' : 'bg-[#fdf8ec]'}`}>
                         {/* Background Icon Watermark */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
                             <span className="material-icons text-[20rem] text-[#d93025] rotate-[-15deg]">assignment</span>
